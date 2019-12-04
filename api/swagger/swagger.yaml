@@ -1,0 +1,249 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Simple Pizza
+host: localhost:10010
+basePath: /
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+  
+securityDefinitions:
+  APIKeySecurity:
+    type: apiKey
+    in: header
+    name: X-Session-ID
+  
+security:
+  - APIKeySecurity: []
+  
+paths:
+  /signup:
+    x-swagger-router-controller: auth
+    post:
+      operationId: 'createUser'
+      summary: Registers a User
+      security: []
+      parameters:
+        - in: 'body'
+          name: 'signup'
+          required: true
+          schema:
+            $ref: '#/definitions/Credentials'
+      responses:
+        "200":  
+          description: User registered
+          schema:
+            $ref: "#/definitions/UserResponse"
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/DefaultResponse"
+          
+  /login:
+    x-swagger-router-controller: auth
+    post:
+      operationId: 'login'
+      summary: Logs in a User
+      security: []
+      parameters:
+        - in: 'body'
+          name: 'login'
+          required: true
+          schema:
+            $ref: '#/definitions/Credentials'
+      responses:
+        "200":
+          description: Successful login
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        "401":
+          description: Login error
+          schema:
+            $ref: "#/definitions/DefaultResponse"
+    
+  /logout:
+    post:
+      x-swagger-router-controller: auth
+      operationId: 'logout'
+      parameters:
+        - name: X-Session-ID
+          in: header
+          type: string
+          required: true
+      responses:
+        "200":
+          description: Successfully logged out
+          schema:
+            $ref: '#/definitions/DefaultResponse'
+        default:
+          description: An error occurred
+          schema:
+            $ref: '#/definitions/DefaultResponse'
+  /pizza:
+    x-swagger-router-controller: pizza
+    post:
+      operationId: create
+      parameters:
+        - name: pizza
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PizzaRequest'
+      responses:
+        "200":
+          description: Pizza created.
+          schema:
+            $ref: '#/definitions/PizzaResponse'
+        "400":
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/DefaultResponse'
+  /pizza/{id}:
+    x-swagger-router-controller: pizza
+    parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Pizza ID.
+    get:
+      operationId: get
+      summary: Get pizza.
+      responses:
+        "200":
+          description: One pizza.
+          schema:
+            $ref: '#/definitions/PizzaResponse'
+        "400":
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/DefaultResponse'
+    put:
+      operationId: put
+      summary: Create or replace.
+      parameters:
+        - in: body
+          name: pizza
+          required: true
+          schema:
+            $ref: '#/definitions/PizzaRequest'
+      responses:
+        "200":
+          description: One pizza.
+          schema:
+            $ref: '#/definitions/PizzaResponse'
+        "400":
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/DefaultResponse'
+    delete:
+      operationId: del
+      summary: Delete pizza.
+      responses:
+        "200":
+          description: Pizza deleted.
+          schema:
+            $ref: '#/definitions/DefaultResponse'
+        "400":
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/DefaultResponse'
+  /buy:
+    x-swagger-router-controller: pizza
+    post:
+      operationId: buy
+      summary: Buy pizza.
+      parameters:
+        - in: query
+          name: pizzaId
+          type: string
+      responses:
+        "200":
+          description: One pizza.
+          schema:
+            $ref: '#/definitions/PizzaResponse'
+        "400":
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/DefaultResponse'
+  /swagger:
+    x-swagger-pipe: swagger_raw
+definitions:
+  Credentials:
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      name:
+        type: string
+
+  DefaultResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+        
+  LoginResponse:
+    required:
+      - "SessionId"
+    properties:
+      SessionId:
+        type: string
+
+  PizzaRequest:
+    required:
+      - size
+      - name
+      - price
+    properties:
+      name:
+        type: string
+      size:
+        type: integer
+      price:
+        type: integer
+        
+  PizzaResponse:
+    required:
+      - id
+      - size
+      - name
+      - price
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      size:
+        type: integer
+      price:
+        type: integer
+  UserResponse:
+    required:
+      - id
+      - email
+      - password
+      - money
+      - coupon
+    properties:
+      id:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      money:
+        type: integer
+      coupon:
+        type: integer
+      
